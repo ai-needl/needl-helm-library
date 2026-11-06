@@ -1,0 +1,75 @@
+{{- define "helmet.podReplicaAlarm" -}}
+{{- if and .Values.podReplicaAlarm.enabled .Values.image.repository (not .Values.scaledJob.enabled) }}
+{{- /* The expression reads kube_deployment metrics, so it only applies to Deployments. Needs grafana-operator and a Grafana folder named by folderRef. */}}
+{{- $name := include "common.names.fullname" . }}
+{{- $datasourceUid := required "podReplicaAlarm.datasourceUid is required when podReplicaAlarm.enabled is true" .Values.podReplicaAlarm.datasourceUid }}
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaAlertRuleGroup
+metadata:
+  name: {{ $name }}-pod-replicas
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  instanceSelector: {{- toYaml .Values.podReplicaAlarm.instanceSelector | nindent 4 }}
+  folderRef: {{ .Values.podReplicaAlarm.folderRef }}
+  interval: 5m
+  rules:
+    - title: {{ printf "%s Pod Replicas Alarm" $name | quote }}
+      uid: {{ printf "%s-pod-replicas" $name | trunc 40 | quote }}
+      for: 1m
+      condition: B
+      noDataState: NoData
+      execErrState: Alerting
+      labels:
+        pod_replicas: "lesser than assigned"
+        alert_team: {{ .Values.podReplicaAlarm.alertTeam | quote }}
+        {{- if .Values.podReplicaAlarm.callgoose }}
+        callgoose: "true"
+        {{- end }}
+      {{- with .Values.podReplicaAlarm.mentions }}
+      annotations:
+        summary: {{ printf "%s has fewer available replicas than desired %s" $name . | quote }}
+      {{- else }}
+      annotations: {}
+      {{- end }}
+      data:
+        - refId: A
+          datasourceUid: {{ $datasourceUid | quote }}
+          relativeTimeRange:
+            from: 300
+            to: 0
+          model:
+            datasource:
+              type: prometheus
+              uid: {{ $datasourceUid | quote }}
+            expr: "sum(kube_deployment_spec_replicas{deployment=~\"{{ $name }}\"}) - sum(kube_deployment_status_replicas_available{deployment=~\"{{ $name }}\"})"
+            maxDataPoints: 1000
+            refId: A
+        - refId: B
+          datasourceUid: "-100"
+          relativeTimeRange:
+            from: 300
+            to: 0
+          model:
+            conditions:
+              - evaluator:
+                  params: [0]
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params: [A]
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: "-100"
+            intervalMs: 1000
+            maxDataPoints: 1000
+            refId: B
+            type: classic_conditions
+{{- end }}
+{{- end -}}

@@ -3,13 +3,17 @@
 {{ include "helmet.configmap" . }}
 {{- end }}
 
-{{- if .Values.image.repository }}
+{{- if and .Values.image.repository (not .Values.scaledJob.enabled) }}
 {{ include "helmet.deployment" . }}
 {{- end }}
 
 {{ include "helmet.persistence" . }}
 
 {{ include "helmet.hpa" . }}
+{{ include "helmet.keda" . }}
+{{ include "helmet.scaledjob" . }}
+{{ include "helmet.pdb" . }}
+{{ include "helmet.podReplicaAlarm" . }}
 {{ include "helmet.ingress" . }}
 {{ include "helmet.gateway" . }}
 
@@ -17,6 +21,7 @@
 {{ include "helmet.secret" . }}
 {{- end }}
 
+{{ include "helmet.sealedsecret" . }}
 {{ include "helmet.tls.secrets" . }}
 {{ include "helmet.tls.selfsigned" . }}
 
