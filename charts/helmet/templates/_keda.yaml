@@ -1,0 +1,36 @@
+{{- define "helmet.keda" -}}
+{{- if and .Values.keda.enabled (not .Values.scaledJob.enabled) }}
+{{- if .Values.autoscaling.enabled }}
+{{- fail "keda.enabled and autoscaling.enabled both create an HPA for the Deployment; enable only one" }}
+{{- end }}
+{{- if not .Values.keda.triggers }}
+{{- fail "keda.triggers is required when keda.enabled is true" }}
+{{- end }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    scaledobject.keda.sh/transfer-hpa-ownership: "true"
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  scaleTargetRef:
+    name: {{ include "common.names.fullname" . }}
+  minReplicaCount: {{ include "common.tplvalues.render" (dict "value" .Values.keda.minReplicaCount "context" $) }}
+  maxReplicaCount: {{ include "common.tplvalues.render" (dict "value" .Values.keda.maxReplicaCount "context" $) }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  {{- /* KEDA's webhook rejects a ScaledObject whose target already has an HPA unless it names that HPA to adopt */}}
+  {{- if .Values.keda.adoptExistingHpa }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: {{ include "common.names.fullname" . }}
+  {{- end }}
+  triggers: {{- include "common.tplvalues.render" (dict "value" .Values.keda.triggers "context" $) | nindent 4 }}
+{{- end }}
+{{- end -}}

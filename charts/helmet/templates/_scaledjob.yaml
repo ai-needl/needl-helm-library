@@ -1,0 +1,51 @@
+{{- define "helmet.scaledjob" -}}
+{{- if .Values.scaledJob.enabled }}
+{{- if not .Values.keda.triggers }}
+{{- fail "keda.triggers is required when scaledJob.enabled is true" }}
+{{- end }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  maxReplicaCount: {{ include "common.tplvalues.render" (dict "value" .Values.keda.maxReplicaCount "context" $) }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  successfulJobsHistoryLimit: {{ .Values.scaledJob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.scaledJob.failedJobsHistoryLimit }}
+  {{- /* `default` is maxScale - runningJobCount, correct only when the trigger's metric also counts claimed work; a queue-only metric needs `accurate` */}}
+  scalingStrategy:
+    strategy: {{ .Values.scaledJob.scalingStrategy }}
+  {{- with .Values.scaledJob.rolloutStrategy }}
+  rollout:
+    strategy: {{ . }}
+  {{- end }}
+  triggers: {{- include "common.tplvalues.render" (dict "value" .Values.keda.triggers "context" $) | nindent 4 }}
+  jobTargetRef:
+    parallelism: 1
+    completions: 1
+    {{- /* The workload owns its retries; a Kubernetes-level retry would spend its attempt budget twice for one failure */}}
+    backoffLimit: {{ .Values.scaledJob.backoffLimit }}
+    {{- with .Values.scaledJob.activeDeadlineSeconds }}
+    activeDeadlineSeconds: {{ . }}
+    {{- end }}
+    {{- with .Values.scaledJob.ttlSecondsAfterFinished }}
+    ttlSecondsAfterFinished: {{ . }}
+    {{- end }}
+    template:
+      metadata:
+        {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.podLabels .Values.commonLabels) "context" .) | fromYaml }}
+        labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 10 }}
+        {{- if .Values.podAnnotations }}
+        annotations: {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 10 }}
+        {{- end }}
+      spec:
+        restartPolicy: Never
+        {{- include "helmet.podSpec" . | nindent 8 }}
+{{- end }}
+{{- end -}}

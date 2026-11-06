@@ -443,6 +443,58 @@ an extra object does not automatically wire it into the Deployment.
 | `autoscaling.metrics`      | Metrics to use when deciding to scale the deployment (evaluated as a template)                     | `[]`    |
 
 
+### KEDA parameters
+
+| Name                    | Description                                                                          | Value   |
+|-------------------------|--------------------------------------------------------------------------------------|---------|
+| `keda.enabled`          | Deploy a KEDA ScaledObject for the APP deployment                                    | `false` |
+| `keda.minReplicaCount`  | Minimum number of replicas (evaluated as a template)                                 | `1`     |
+| `keda.maxReplicaCount`  | Maximum number of replicas, also the ScaledJob's job limit (evaluated as a template) | `5`     |
+| `keda.pollingInterval`  | Seconds between trigger checks                                                       | `30`    |
+| `keda.cooldownPeriod`   | Seconds to wait after the last active trigger before scaling to minReplicaCount      | `300`   |
+| `keda.adoptExistingHpa` | Take over an HPA that already targets the Deployment and is named after it           | `false` |
+| `keda.triggers`         | KEDA triggers, shared with the ScaledJob (evaluated as a template)                   | `[]`    |
+
+### ScaledJob parameters
+
+| Name                                   | Description                                                      | Value     |
+|----------------------------------------|------------------------------------------------------------------|-----------|
+| `scaledJob.enabled`                    | Deploy a KEDA ScaledJob instead of the Deployment                | `false`   |
+| `scaledJob.scalingStrategy`            | Scaling strategy (default, custom, accurate or eager)            | `default` |
+| `scaledJob.rolloutStrategy`            | Rollout strategy for running jobs on update (default or gradual) | `""`      |
+| `scaledJob.backoffLimit`               | Job retries before marking it failed                             | `0`       |
+| `scaledJob.activeDeadlineSeconds`      | Maximum job run time in seconds                                  | `nil`     |
+| `scaledJob.ttlSecondsAfterFinished`    | Seconds to keep a finished job                                   | `nil`     |
+| `scaledJob.successfulJobsHistoryLimit` | Number of successful jobs to keep                                | `5`       |
+| `scaledJob.failedJobsHistoryLimit`     | Number of failed jobs to keep                                    | `20`      |
+
+### Pod Disruption Budget parameters
+
+| Name               | Description                                                               | Value   |
+|--------------------|---------------------------------------------------------------------------|---------|
+| `pdb.enabled`      | Deploy a PodDisruptionBudget for the APP deployment                       | `false` |
+| `pdb.minAvailable` | Minimum number of pods that must stay available (evaluated as a template) | `1`     |
+
+### Pod replica alarm parameters
+
+| Name                               | Description                                               | Value                                      |
+|------------------------------------|-----------------------------------------------------------|--------------------------------------------|
+| `podReplicaAlarm.enabled`          | Deploy a GrafanaAlertRuleGroup for the APP deployment     | `false`                                    |
+| `podReplicaAlarm.datasourceUid`    | UID of the Prometheus datasource the alert queries        | `""`                                       |
+| `podReplicaAlarm.folderRef`        | Name of the GrafanaFolder the alert goes in               | `grafana-folder-prometheus-alarms`         |
+| `podReplicaAlarm.alertTeam`        | Value of the alert's alert_team label, used for routing   | `devops`                                   |
+| `podReplicaAlarm.callgoose`        | Add the callgoose label so the alert pages                | `false`                                    |
+| `podReplicaAlarm.mentions`         | Text appended to the alert summary, e.g. Slack mentions   | `""`                                       |
+| `podReplicaAlarm.instanceSelector` | Selector for the Grafana instance the alert is created in | `{"matchLabels":{"dashboards":"grafana"}}` |
+
+### Sealed Secret parameters
+
+| Name                         | Description                                                                            | Value    |
+|------------------------------|----------------------------------------------------------------------------------------|----------|
+| `sealedSecret.name`          | Secret name; must match the name the values were sealed for (defaults to the fullname) | `""`     |
+| `sealedSecret.type`          | Type of the Secret the controller creates                                              | `Opaque` |
+| `sealedSecret.encryptedData` | Sealed values, keyed by Secret key                                                     | `{}`     |
+
 ### ConfigMap parameters
 
 | Name                    | Description                                     | Value         |

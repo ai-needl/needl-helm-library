@@ -525,6 +525,86 @@ exports:
       targetMemory: 80
       metrics: []
 
+    ## Autoscale the Deployment with KEDA instead of a plain HPA (don't enable both)
+    ## ref: https://keda.sh/docs/latest/reference/scaledobject-spec/
+    ## @param keda.enabled Deploy a KEDA ScaledObject for the APP deployment
+    ## @param keda.minReplicaCount Minimum number of replicas (evaluated as a template)
+    ## @param keda.maxReplicaCount Maximum number of replicas, also the ScaledJob's job limit (evaluated as a template)
+    ## @param keda.pollingInterval Seconds between trigger checks
+    ## @param keda.cooldownPeriod Seconds to wait after the last active trigger before scaling to minReplicaCount
+    ## @param keda.adoptExistingHpa Take over an HPA that already targets the Deployment and is named after it
+    ## @param keda.triggers [array] KEDA triggers, shared with the ScaledJob (evaluated as a template)
+    ##
+    keda:
+      enabled: false
+      minReplicaCount: 1
+      maxReplicaCount: 5
+      pollingInterval: 30
+      cooldownPeriod: 300
+      adoptExistingHpa: false
+      triggers: []
+
+    ## Run the workload as a KEDA ScaledJob instead of a Deployment, using keda.triggers and keda.maxReplicaCount
+    ## ref: https://keda.sh/docs/latest/reference/scaledjob-spec/
+    ## @param scaledJob.enabled Deploy a KEDA ScaledJob instead of the Deployment
+    ## @param scaledJob.scalingStrategy Scaling strategy (default, custom, accurate or eager)
+    ## @param scaledJob.rolloutStrategy Rollout strategy for running jobs on update (default or gradual)
+    ## @param scaledJob.backoffLimit Job retries before marking it failed
+    ## @param scaledJob.activeDeadlineSeconds Maximum job run time in seconds
+    ## @param scaledJob.ttlSecondsAfterFinished Seconds to keep a finished job
+    ## @param scaledJob.successfulJobsHistoryLimit Number of successful jobs to keep
+    ## @param scaledJob.failedJobsHistoryLimit Number of failed jobs to keep
+    ##
+    scaledJob:
+      enabled: false
+      scalingStrategy: default
+      rolloutStrategy: ""
+      backoffLimit: 0
+      activeDeadlineSeconds: null
+      ttlSecondsAfterFinished: null
+      successfulJobsHistoryLimit: 5
+      failedJobsHistoryLimit: 20
+
+    ## Pod Disruption Budget for the APP deployment
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    ## @param pdb.enabled Deploy a PodDisruptionBudget for the APP deployment
+    ## @param pdb.minAvailable Minimum number of pods that must stay available (evaluated as a template)
+    ##
+    pdb:
+      enabled: false
+      minAvailable: 1
+
+    ## Grafana alert when the Deployment has fewer available replicas than desired (needs grafana-operator)
+    ## @param podReplicaAlarm.enabled Deploy a GrafanaAlertRuleGroup for the APP deployment
+    ## @param podReplicaAlarm.datasourceUid UID of the Prometheus datasource the alert queries
+    ## @param podReplicaAlarm.folderRef Name of the GrafanaFolder the alert goes in
+    ## @param podReplicaAlarm.alertTeam Value of the alert's alert_team label, used for routing
+    ## @param podReplicaAlarm.callgoose Add the callgoose label so the alert pages
+    ## @param podReplicaAlarm.mentions Text appended to the alert summary, e.g. Slack mentions
+    ## @param podReplicaAlarm.instanceSelector [object] Selector for the Grafana instance the alert is created in
+    ##
+    podReplicaAlarm:
+      enabled: false
+      datasourceUid: ""
+      folderRef: grafana-folder-prometheus-alarms
+      alertTeam: devops
+      callgoose: false
+      mentions: ""
+      instanceSelector:
+        matchLabels:
+          dashboards: grafana
+
+    ## Sealed Secrets: encrypted values committed to git, decrypted in the cluster by the sealed-secrets controller
+    ## ref: https://github.com/bitnami-labs/sealed-secrets
+    ## @param sealedSecret.name Secret name; must match the name the values were sealed for (defaults to the fullname)
+    ## @param sealedSecret.type Type of the Secret the controller creates
+    ## @param sealedSecret.encryptedData [object] Sealed values, keyed by Secret key
+    ##
+    sealedSecret:
+      name: ""
+      type: Opaque
+      encryptedData: {}
+
     ## Configure the ConfigMap resource that allows you to store non-confidential data in key-value pairs.
     ## ref: https://kubernetes.io/docs/concepts/configuration/configmap/
     ##
