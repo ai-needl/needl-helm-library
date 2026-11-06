@@ -19,7 +19,7 @@ containers:
     {{- if .Values.envVars }}
     env: {{- include "helmet.toEnvArray" (dict "envVars" .Values.envVars "context" $) | indent 6 }}
     {{- end }}
-    {{- if or .Values.envVarsConfigMap .Values.envVarsSecret }}
+    {{- if or .Values.envVarsConfigMap .Values.envVarsSecret .Values.sealedSecret.encryptedData }}
     envFrom:
       {{- if .Values.envVarsConfigMap }}
       - configMapRef:
@@ -28,6 +28,10 @@ containers:
       {{- if .Values.envVarsSecret }}
       - secretRef:
           name: {{ include "common.tplvalues.render" (dict "value" .Values.envVarsSecret "context" $) }}
+      {{- end }}
+      {{- if .Values.sealedSecret.encryptedData }}
+      - secretRef:
+          name: {{ include "helmet.sealedSecretName" . }}
       {{- end }}
     {{- end }}
     {{- if .Values.ports }}

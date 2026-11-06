@@ -594,9 +594,10 @@ exports:
         matchLabels:
           dashboards: grafana
 
-    ## Sealed Secrets: encrypted values committed to git, decrypted in the cluster by the sealed-secrets controller
+    ## Sealed Secrets: encrypted values committed to git, decrypted in the cluster by the sealed-secrets controller.
+    ## Every key becomes an environment variable of the same name (envFrom), so adding a secret needs no other values change.
     ## ref: https://github.com/bitnami-labs/sealed-secrets
-    ## @param sealedSecret.name Secret name; must match the name the values were sealed for (defaults to the fullname)
+    ## @param sealedSecret.name Secret name; must match the name the values were sealed for (defaults to <fullname>-env)
     ## @param sealedSecret.type Type of the Secret the controller creates
     ## @param sealedSecret.encryptedData [object] Sealed values, keyed by Secret key
     ##

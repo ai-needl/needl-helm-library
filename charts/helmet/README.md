@@ -489,11 +489,11 @@ an extra object does not automatically wire it into the Deployment.
 
 ### Sealed Secret parameters
 
-| Name                         | Description                                                                            | Value    |
-|------------------------------|----------------------------------------------------------------------------------------|----------|
-| `sealedSecret.name`          | Secret name; must match the name the values were sealed for (defaults to the fullname) | `""`     |
-| `sealedSecret.type`          | Type of the Secret the controller creates                                              | `Opaque` |
-| `sealedSecret.encryptedData` | Sealed values, keyed by Secret key                                                     | `{}`     |
+| Name                         | Description                                                                              | Value    |
+|------------------------------|------------------------------------------------------------------------------------------|----------|
+| `sealedSecret.name`          | Secret name; must match the name the values were sealed for (defaults to <fullname>-env) | `""`     |
+| `sealedSecret.type`          | Type of the Secret the controller creates                                                | `Opaque` |
+| `sealedSecret.encryptedData` | Sealed values, keyed by env var name; each becomes an env var via envFrom                | `{}`     |
 
 ### ConfigMap parameters
 
