@@ -187,6 +187,10 @@ exports:
     ##
     revisionHistoryLimit: 10
 
+    ## @param minReadySeconds Seconds a new pod must stay ready before it counts as available, so a rollout fails on a pod that crashes soon after starting
+    ##
+    minReadySeconds: 30
+
     ## List of ports to expose from the container.
     ## ref: https://kubernetes.io/docs/concepts/services-networking/connect-applications-service
     ##
@@ -500,11 +504,11 @@ exports:
     ##
     envVars: null
 
-    ## @param envVarsConfigMap ConfigMap with environment variables
+    ## @param envVarsConfigMap ConfigMap, or list of ConfigMaps, with environment variables
     ##
     envVarsConfigMap: ""
 
-    ## @param envVarsSecret Secret with environment variables
+    ## @param envVarsSecret Secret, or list of Secrets, with environment variables
     ##
     envVarsSecret: ""
 

@@ -390,6 +390,7 @@ an extra object does not automatically wire it into the Deployment.
 |-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
 | `replicaCount`                          | Number of APP replicas                                                                                                   | `1`                                                              |
 | `revisionHistoryLimit`                  | The number of old history to retain to allow rollback                                                                    | `10`                                                             |
+| `minReadySeconds`                       | Seconds a new pod must stay ready before it counts as available                                                          | `30`                                                             |
 | `ports`                                 | List of ports to expose from the container                                                                               | `[{"name": "http", "containerPort": "8080", "protocol": "TCP"}]` |
 | `livenessProbe.enabled`                 | Enable livenessProbe on APP container (only main container)                                                              | `false`                                                          |
 | `readinessProbe.enabled`                | Enable readinessProbe on APP container (only main container)                                                             | `false`                                                          |
@@ -427,8 +428,8 @@ an extra object does not automatically wire it into the Deployment.
 | `command`                               | Override main container's command                                                                                        | `[]`                                                             |
 | `args`                                  | Override main container's args                                                                                           | `[]`                                                             |
 | `envVars`                               | Environment variables to be set on APP container                                                                         | `{} or []`                                                             |
-| `envVarsConfigMap`                      | ConfigMap with environment variables                                                                                     | `""`                                                             |
-| `envVarsSecret`                         | Secret with environment variables                                                                                        | `""`                                                             |
+| `envVarsConfigMap`                      | ConfigMap, or list of ConfigMaps, with environment variables                                                             | `""`                                                             |
+| `envVarsSecret`                         | Secret, or list of Secrets, with environment variables                                                                   | `""`                                                             |
 
 
 ### Autoscaling parameters
