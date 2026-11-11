@@ -45,8 +45,8 @@ jobs:
     # feature branches and PRs stop at Check.
     if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
-    # AWS_ACCOUNT_ID, AWS_REGION, ECR_PUBLISH_ROLE_ARN and ECR_NAMESPACE are
-    # read from the "stage" GitHub environment's variables.
+    # From the "stage" GitHub environment: AWS_ACCOUNT_ID, AWS_REGION and
+    # ECR_NAMESPACE variables, and the ECR_PUBLISH_ROLE_ARN secret.
     environment: stage
     permissions:
       id-token: write   # OIDC federation to AWS
@@ -90,7 +90,7 @@ jobs:
         if: steps.changes.outputs.chart == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.ECR_PUBLISH_ROLE_ARN }}
+          role-to-assume: ${{ secrets.ECR_PUBLISH_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Log in to Stage ECR
