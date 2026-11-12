@@ -37,6 +37,14 @@ jobs:
         run: |
           helm lint helmet
 
+      # helm lint can't render a library chart, so render it through a chart that depends on it
+      - name: Render test chart
+        run: |
+          helm dependency build tests/helmet
+          for values in tests/helmet/values/*.yaml; do
+            helm template test tests/helmet -f "$values" > /dev/null
+          done
+
   release:
     name: Release
     needs: check
