@@ -1,0 +1,57 @@
+{{- define "helmet.jobs" -}}
+{{- $cronJobKeys := list "concurrencyPolicy" "suspend" "startingDeadlineSeconds" "successfulJobsHistoryLimit" "failedJobsHistoryLimit" "backoffLimit" "activeDeadlineSeconds" "ttlSecondsAfterFinished" "restartPolicy" }}
+{{- range $job := .Values.jobs }}
+{{- $name := required "jobs[].name is required" $job.name }}
+{{- $cronJob := deepCopy $.Values.jobDefaults }}
+{{- $overrides := omit $job "name" "schedule" }}
+{{- range $key := $cronJobKeys }}
+{{- if hasKey $job $key }}
+{{- $_ := set $cronJob $key (index $job $key) }}
+{{- $_ := unset $overrides $key }}
+{{- end }}
+{{- end }}
+{{- /* Each job renders the chart's pod spec with its own values merged on top; fullname becomes the job name */}}
+{{- $values := mergeOverwrite (deepCopy $.Values) (deepCopy $overrides) }}
+{{- $_ := set $values.sealedSecret "name" (include "helmet.sealedSecretName" $) }}
+{{- $_ := set $values "fullnameOverride" $name }}
+{{- $ctx := dict "Values" $values "Release" $.Release "Chart" $.Chart "Capabilities" $.Capabilities "Template" $.Template "Files" $.Files }}
+{{- $podLabels := include "common.tplvalues.merge" (dict "values" (list $values.podLabels $values.commonLabels) "context" $ctx) | fromYaml }}
+---
+apiVersion: {{ include "common.capabilities.cronjob.apiVersion" $ctx }}
+kind: CronJob
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" $ctx | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $values.commonLabels "context" $ctx ) | nindent 4 }}
+  {{- if $values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $values.commonAnnotations "context" $ctx ) | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ required (printf "jobs[%s].schedule is required" $name) $job.schedule | quote }}
+  concurrencyPolicy: {{ $cronJob.concurrencyPolicy }}
+  suspend: {{ $cronJob.suspend }}
+  {{- if not (kindIs "invalid" $cronJob.startingDeadlineSeconds) }}
+  startingDeadlineSeconds: {{ $cronJob.startingDeadlineSeconds }}
+  {{- end }}
+  successfulJobsHistoryLimit: {{ $cronJob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $cronJob.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ $cronJob.backoffLimit }}
+      {{- with $cronJob.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      {{- if not (kindIs "invalid" $cronJob.ttlSecondsAfterFinished) }}
+      ttlSecondsAfterFinished: {{ $cronJob.ttlSecondsAfterFinished }}
+      {{- end }}
+      template:
+        metadata:
+          labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ctx ) | nindent 12 }}
+          {{- if $values.podAnnotations }}
+          annotations: {{- include "common.tplvalues.render" (dict "value" $values.podAnnotations "context" $ctx) | nindent 12 }}
+          {{- end }}
+        spec:
+          restartPolicy: {{ $cronJob.restartPolicy }}
+          {{- include "helmet.podSpec" $ctx | nindent 10 }}
+{{- end }}
+{{- end -}}

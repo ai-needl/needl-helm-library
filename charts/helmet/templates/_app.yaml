@@ -3,7 +3,7 @@
 {{ include "helmet.configmap" . }}
 {{- end }}
 
-{{- if and .Values.image.repository (not .Values.scaledJob.enabled) }}
+{{- if and .Values.deployment.enabled .Values.image.repository (not .Values.scaledJob.enabled) }}
 {{ include "helmet.deployment" . }}
 {{- end }}
 
@@ -32,6 +32,7 @@
 {{ include "helmet.serviceaccount" . }}
 {{ include "helmet.servicemonitor" . }}
 {{ include "helmet.cronjob" . }}
+{{ include "helmet.jobs" . }}
 {{ include "helmet.podmonitor" . }}
 {{ include "helmet.extraObjects" . }}
 {{- end }}

@@ -3,7 +3,7 @@ name: helmet
 description: Helmet is a library Helm Chart for grouping common logics. This chart is not deployable by itself.
 home: https://github.com/ai-needl/needl-helm-library/tree/main/charts/helmet
 type: library
-version: "0.17.1"
+version: "0.17.2"
 appVersion: "0.17.0"
 keywords:
   - common
