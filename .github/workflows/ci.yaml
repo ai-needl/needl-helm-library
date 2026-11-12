@@ -38,6 +38,32 @@ jobs:
       - name: Helm lint
         run: helm lint "$CHART_DIR"
 
+      - name: Install kubeconform
+        env:
+          KUBECONFORM_VERSION: v0.8.0
+          KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
+        run: |
+          curl -sSLo kubeconform.tar.gz "https://github.com/yannh/kubeconform/releases/download/$KUBECONFORM_VERSION/kubeconform-linux-amd64.tar.gz"
+          echo "$KUBECONFORM_SHA256  kubeconform.tar.gz" | sha256sum -c -
+          sudo tar -xzf kubeconform.tar.gz -C /usr/local/bin kubeconform
+          rm kubeconform.tar.gz
+
+      # helm lint can't render a library chart, so render it through a chart that depends on it
+      # and validate the output against the Kubernetes and CRD schemas
+      - name: Render test chart
+        shell: bash
+        run: |
+          helm dependency build "$CHART_DIR"
+          helm dependency build tests/helmet
+          for values in tests/helmet/values/*.yaml; do
+            echo "::group::$values"
+            helm template test tests/helmet -f "$values" \
+              | kubeconform -strict -summary \
+                  -schema-location default \
+                  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+            echo "::endgroup::"
+          done
+
   release-stage:
     name: Release to Stage ECR
     needs: check

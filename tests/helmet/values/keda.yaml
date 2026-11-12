@@ -1,0 +1,20 @@
+image:
+  repository: example
+
+ports: []
+
+envVarsConfigMap: shared-config
+
+keda:
+  enabled: true
+  maxReplicaCount: 4
+  triggers:
+    - type: metrics-api
+      metadata:
+        format: json
+        targetValue: "20"
+        url: http://metrics.local/count
+        valueLocation: count
+
+pdb:
+  enabled: true

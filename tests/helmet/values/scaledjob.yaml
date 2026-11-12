@@ -1,0 +1,24 @@
+image:
+  repository: example
+
+ports: []
+
+command: ["python", "-m", "app", "--once"]
+
+scaledJob:
+  enabled: true
+  activeDeadlineSeconds: 5400
+
+keda:
+  maxReplicaCount: 10
+  triggers:
+    - type: metrics-api
+      metadata:
+        format: json
+        targetValue: "1"
+        url: http://metrics.local/count
+        valueLocation: count
+
+sealedSecret:
+  encryptedData:
+    API_KEY: sealed-value
