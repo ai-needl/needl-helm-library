@@ -36,6 +36,11 @@ spec:
   successfulJobsHistoryLimit: {{ $cronJob.successfulJobsHistoryLimit }}
   failedJobsHistoryLimit: {{ $cronJob.failedJobsHistoryLimit }}
   jobTemplate:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ctx ) | nindent 8 }}
+      {{- if $values.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" $values.podAnnotations "context" $ctx) | nindent 8 }}
+      {{- end }}
     spec:
       backoffLimit: {{ $cronJob.backoffLimit }}
       {{- with $cronJob.activeDeadlineSeconds }}
