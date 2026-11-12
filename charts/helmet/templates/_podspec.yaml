@@ -21,13 +21,13 @@ containers:
     {{- end }}
     {{- if or .Values.envVarsConfigMap .Values.envVarsSecret .Values.sealedSecret.encryptedData }}
     envFrom:
-      {{- if .Values.envVarsConfigMap }}
+      {{- range (kindIs "slice" .Values.envVarsConfigMap | ternary .Values.envVarsConfigMap (list .Values.envVarsConfigMap)) | compact }}
       - configMapRef:
-          name: {{ include "common.tplvalues.render" (dict "value" .Values.envVarsConfigMap "context" $) }}
+          name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
       {{- end }}
-      {{- if .Values.envVarsSecret }}
+      {{- range (kindIs "slice" .Values.envVarsSecret | ternary .Values.envVarsSecret (list .Values.envVarsSecret)) | compact }}
       - secretRef:
-          name: {{ include "common.tplvalues.render" (dict "value" .Values.envVarsSecret "context" $) }}
+          name: {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
       {{- end }}
       {{- if .Values.sealedSecret.encryptedData }}
       - secretRef:
