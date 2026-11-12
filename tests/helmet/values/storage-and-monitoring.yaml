@@ -1,0 +1,84 @@
+image:
+  registry: registry.example.com
+  repository: example
+  tag: "1.0.0"
+
+ports:
+  - name: http
+    containerPort: 8000
+    protocol: TCP
+
+configMap:
+  mounted: true
+  data:
+    config.yaml:
+      mode: production
+    FOO: bar
+
+secret:
+  stringData:
+    PASSWORD: example
+
+envVarsSecret:
+  - shared-secret
+  - other-secret
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+ingress:
+  enabled: true
+  hostname: example.local
+  tls: true
+  secrets:
+    - name: example.local-tls
+      certificate: example-certificate
+      key: example-key
+
+route:
+  main:
+    kind: HTTPRoute
+    parentRefs:
+      - name: shared-gateway
+        namespace: infrastructure
+        sectionName: https
+    hostnames:
+      - example.local
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+        backendRefs:
+          - identifier: app
+            port: http
+  redirect:
+    kind: HTTPRoute
+    parentRefs:
+      - name: shared-gateway
+        namespace: infrastructure
+        sectionName: http
+    hostnames:
+      - example.local
+    rules:
+      - filters:
+          - type: RequestRedirect
+            requestRedirect:
+              scheme: https
+              statusCode: 301
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+podMonitor:
+  enabled: true
+
+extraObjects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: '{{ include "common.names.fullname" . }}-extra'
+    data:
+      KEY: value
