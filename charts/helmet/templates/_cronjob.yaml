@@ -32,7 +32,7 @@ spec:
           {{- end }}
           restartPolicy: OnFailure
           {{- if .Values.podSecurityContext.enabled }}
-          securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "helmet.securityContext" .Values.podSecurityContext | nindent 12 }}
           {{- end }}
           {{- if .Values.cronjob.initContainers }}
           initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.cronjob.initContainers "context" $) | nindent 12 }}

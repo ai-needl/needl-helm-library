@@ -1,0 +1,4 @@
+# Charts unset helmet's default user with null, which newer Helm keeps in the merged values
+containerSecurityContext:
+  runAsUser: null
+  runAsNonRoot: null

@@ -6,7 +6,7 @@ initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.init
 containers:
   - name: {{ .Chart.Name }}
     {{- if .Values.containerSecurityContext.enabled }}
-    securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 6 }}
+    securityContext: {{- include "helmet.securityContext" .Values.containerSecurityContext | nindent 6 }}
     {{- end }}
     image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
     imagePullPolicy: {{ default (eq .Values.image.tag "latest" | ternary "Always" "IfNotPresent") .Values.image.pullPolicy }}
@@ -125,7 +125,7 @@ topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .
 schedulerName: {{ .Values.schedulerName | quote }}
 {{- end }}
 {{- if .Values.podSecurityContext.enabled }}
-securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 2 }}
+securityContext: {{- include "helmet.securityContext" .Values.podSecurityContext | nindent 2 }}
 {{- end }}
 {{- if .Values.terminationGracePeriodSeconds }}
 terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

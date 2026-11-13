@@ -30,3 +30,19 @@ Usage:
 {{ include "common.tplvalues.render" (dict "value" .envVars "context" $.context) }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Render a securityContext values map without its "enabled" flag or null keys.
+Newer Helm versions keep a null that overrides an imported default, so this is
+what lets a chart unset a default such as runAsUser.
+Usage: {{ include "helmet.securityContext" .Values.containerSecurityContext }}
+*/}}
+{{- define "helmet.securityContext" -}}
+{{- $securityContext := dict -}}
+{{- range $key, $value := omit . "enabled" -}}
+{{- if not (kindIs "invalid" $value) -}}
+{{- $_ := set $securityContext $key $value -}}
+{{- end -}}
+{{- end -}}
+{{- toYaml $securityContext -}}
+{{- end -}}

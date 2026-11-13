@@ -22,3 +22,7 @@ keda:
 sealedSecret:
   encryptedData:
     API_KEY: sealed-value
+
+containerSecurityContext:
+  enabled: true
+  readOnlyRootFilesystem: true
