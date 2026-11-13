@@ -1,0 +1,41 @@
+image:
+  repository: example
+
+deployment:
+  enabled: false
+
+ports: []
+
+commonLabels:
+  app: '{{ include "common.names.fullname" . }}'
+
+envVarsConfigMap:
+  - shared-config
+
+envVars:
+  LOG_LEVEL: info
+
+jobDefaults:
+  concurrencyPolicy: Forbid
+  ttlSecondsAfterFinished: 0
+
+jobs:
+  - name: example-sync
+    schedule: "0 * * * *"
+    envVars:
+      TASK: sync
+  - name: example-cleanup
+    schedule: "30 2 * * *"
+    concurrencyPolicy: Replace
+    suspend: true
+    command: ["python", "-m", "cleanup"]
+    envVarsConfigMap:
+      - shared-config
+      - other-config
+    resources:
+      limits:
+        memory: 1Gi
+
+sealedSecret:
+  encryptedData:
+    API_KEY: sealed-value

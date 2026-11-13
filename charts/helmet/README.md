@@ -469,6 +469,22 @@ an extra object does not automatically wire it into the Deployment.
 | `scaledJob.successfulJobsHistoryLimit` | Number of successful jobs to keep                                | `5`       |
 | `scaledJob.failedJobsHistoryLimit`     | Number of failed jobs to keep                                    | `20`      |
 
+### CronJob list parameters
+
+| Name                                     | Description                                                                                                                                                    | Value       |
+|------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `deployment.enabled`                     | Deploy the APP Deployment; turn off for charts that only run jobs                                                                                              | `true`      |
+| `jobs`                                   | CronJobs to deploy. Each needs `name` (the CronJob name) and `schedule`, can set any jobDefaults key, and any other key overrides the chart value for that job | `[]`        |
+| `jobDefaults.concurrencyPolicy`          | How to treat a run that starts while the last is still running (Allow, Forbid or Replace)                                                                      | `Allow`     |
+| `jobDefaults.suspend`                    | Suspend the CronJobs                                                                                                                                           | `false`     |
+| `jobDefaults.startingDeadlineSeconds`    | Seconds after a missed schedule a run may still start                                                                                                          | `600`       |
+| `jobDefaults.successfulJobsHistoryLimit` | Number of successful jobs to keep                                                                                                                              | `5`         |
+| `jobDefaults.failedJobsHistoryLimit`     | Number of failed jobs to keep                                                                                                                                  | `10`        |
+| `jobDefaults.backoffLimit`               | Job retries before marking it failed                                                                                                                           | `3`         |
+| `jobDefaults.activeDeadlineSeconds`      | Maximum job run time in seconds                                                                                                                                | `nil`       |
+| `jobDefaults.ttlSecondsAfterFinished`    | Seconds to keep a finished job; unset keeps them up to the history limits                                                                                      | `nil`       |
+| `jobDefaults.restartPolicy`              | Pod restart policy (OnFailure or Never)                                                                                                                        | `OnFailure` |
+
 ### Pod Disruption Budget parameters
 
 | Name               | Description                                                               | Value   |

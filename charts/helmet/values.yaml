@@ -569,6 +569,45 @@ exports:
       successfulJobsHistoryLimit: 5
       failedJobsHistoryLimit: 20
 
+    ## @param deployment.enabled Deploy the APP Deployment; turn off for charts that only run jobs
+    ##
+    deployment:
+      enabled: true
+
+    ## CronJobs that share the chart's image and pod settings, so each job only sets what differs
+    ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+    ## @param jobs [array] CronJobs to deploy. Each needs `name` (the CronJob name) and `schedule`, can set any jobDefaults key, and any other key (command, args, resources, envVars, ...) overrides the chart value for that job
+    ## e.g:
+    ## jobs:
+    ##   - name: report-sync
+    ##     schedule: "0 * * * *"
+    ##     concurrencyPolicy: Forbid
+    ##     envVars:
+    ##       TASK: report_sync
+    ##
+    jobs: []
+
+    ## @param jobDefaults.concurrencyPolicy How to treat a run that starts while the last is still running (Allow, Forbid or Replace)
+    ## @param jobDefaults.suspend Suspend the CronJobs
+    ## @param jobDefaults.startingDeadlineSeconds Seconds after a missed schedule a run may still start
+    ## @param jobDefaults.successfulJobsHistoryLimit Number of successful jobs to keep
+    ## @param jobDefaults.failedJobsHistoryLimit Number of failed jobs to keep
+    ## @param jobDefaults.backoffLimit Job retries before marking it failed
+    ## @param jobDefaults.activeDeadlineSeconds Maximum job run time in seconds
+    ## @param jobDefaults.ttlSecondsAfterFinished Seconds to keep a finished job; unset keeps them up to the history limits
+    ## @param jobDefaults.restartPolicy Pod restart policy (OnFailure or Never)
+    ##
+    jobDefaults:
+      concurrencyPolicy: Allow
+      suspend: false
+      startingDeadlineSeconds: 600
+      successfulJobsHistoryLimit: 5
+      failedJobsHistoryLimit: 10
+      backoffLimit: 3
+      activeDeadlineSeconds: null
+      ttlSecondsAfterFinished: null
+      restartPolicy: OnFailure
+
     ## Pod Disruption Budget for the APP deployment
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
     ## @param pdb.enabled Deploy a PodDisruptionBudget for the APP deployment
