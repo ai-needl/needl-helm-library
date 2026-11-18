@@ -31,6 +31,7 @@ spec:
           tolerations: {{- default (toYaml .Values.tolerations) (toYaml .Values.cronjob.tolerations) | nindent 12 }}
           {{- end }}
           restartPolicy: OnFailure
+          enableServiceLinks: {{ .Values.enableServiceLinks }}
           {{- if .Values.podSecurityContext.enabled }}
           securityContext: {{- include "helmet.securityContext" .Values.podSecurityContext | nindent 12 }}
           {{- end }}

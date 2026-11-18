@@ -60,3 +60,5 @@ podReplicaAlarm:
 sealedSecret:
   encryptedData:
     API_KEY: sealed-value
+
+enableServiceLinks: false

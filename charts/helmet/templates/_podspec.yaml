@@ -95,6 +95,7 @@ volumes:
 {{- if .Values.hostAliases }}
 hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hostAliases "context" $) | nindent 2 }}
 {{- end }}
+enableServiceLinks: {{ .Values.enableServiceLinks }}
 {{- if .Values.affinity }}
 affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.affinity "context" $) | nindent 2 }}
 {{- else if or .Values.podAffinityPreset .Values.podAntiAffinityPreset .Values.nodeAffinityPreset.type }}

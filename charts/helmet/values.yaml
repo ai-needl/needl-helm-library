@@ -360,6 +360,11 @@ exports:
     ##
     hostAliases: []
 
+    ## @param enableServiceLinks Inject environment variables for every Service in the namespace
+    ## Turn off when a Service name collides with the app's own variables, e.g. a "superset" Service sets SUPERSET_PORT
+    ##
+    enableServiceLinks: true
+
     ## @param podLabels Additional pod labels
     ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
     ##
