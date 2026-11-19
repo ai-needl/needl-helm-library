@@ -365,6 +365,10 @@ exports:
     ##
     enableServiceLinks: true
 
+    ## @param hostUsers Share the host's user namespace; false gives the pod its own, for sandboxes that mount /proc
+    ##
+    hostUsers: null
+
     ## @param podLabels Additional pod labels
     ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
     ##

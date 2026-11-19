@@ -62,3 +62,4 @@ sealedSecret:
     API_KEY: sealed-value
 
 enableServiceLinks: false
+hostUsers: false
