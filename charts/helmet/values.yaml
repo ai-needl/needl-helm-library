@@ -620,7 +620,7 @@ exports:
     ## Pod Disruption Budget for the APP deployment
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
     ## @param pdb.enabled Deploy a PodDisruptionBudget for the APP deployment
-    ## @param pdb.minAvailable Minimum number of pods that must stay available (evaluated as a template)
+    ## @param pdb.minAvailable Minimum number of pods that must stay available, replaced by maxUnavailable 1 when it would block every eviction (evaluated as a template)
     ##
     pdb:
       enabled: false

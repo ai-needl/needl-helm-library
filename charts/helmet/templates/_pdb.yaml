@@ -11,7 +11,19 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  minAvailable: {{ include "common.tplvalues.render" (dict "value" .Values.pdb.minAvailable "context" $) }}
+  {{- $minAvailable := include "common.tplvalues.render" (dict "value" .Values.pdb.minAvailable "context" $) }}
+  {{- $minReplicas := toString .Values.replicaCount }}
+  {{- if .Values.keda.enabled }}
+  {{- $minReplicas = include "common.tplvalues.render" (dict "value" .Values.keda.minReplicaCount "context" $) }}
+  {{- else if .Values.autoscaling.enabled }}
+  {{- $minReplicas = toString .Values.autoscaling.minReplicas }}
+  {{- end }}
+  {{- /* At or above the minimum replica count, minAvailable allows no evictions and blocks every node drain. */}}
+  {{- if and (not (hasSuffix "%" $minAvailable)) (gt (atoi $minAvailable) 0) (ge (atoi $minAvailable) (atoi $minReplicas)) }}
+  maxUnavailable: 1
+  {{- else }}
+  minAvailable: {{ $minAvailable }}
+  {{- end }}
   {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.podLabels .Values.commonLabels) "context" .) | fromYaml }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
