@@ -490,7 +490,7 @@ an extra object does not automatically wire it into the Deployment.
 | Name               | Description                                                               | Value   |
 |--------------------|---------------------------------------------------------------------------|---------|
 | `pdb.enabled`      | Deploy a PodDisruptionBudget for the APP deployment                       | `false` |
-| `pdb.minAvailable` | Minimum number of pods that must stay available (evaluated as a template) | `1`     |
+| `pdb.minAvailable` | Minimum number of pods that must stay available, replaced by maxUnavailable 1 when it would block every eviction (evaluated as a template) | `1`     |
 
 ### Pod replica alarm parameters
 
