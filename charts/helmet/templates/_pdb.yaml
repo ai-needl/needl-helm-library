@@ -19,7 +19,7 @@ spec:
   {{- $minReplicas = toString .Values.autoscaling.minReplicas }}
   {{- end }}
   {{- /* At or above the minimum replica count, minAvailable allows no evictions and blocks every node drain. */}}
-  {{- if and (not (hasSuffix "%" $minAvailable)) (ge (atoi $minAvailable) (atoi $minReplicas)) }}
+  {{- if and (not (hasSuffix "%" $minAvailable)) (gt (atoi $minAvailable) 0) (ge (atoi $minAvailable) (atoi $minReplicas)) }}
   maxUnavailable: 1
   {{- else }}
   minAvailable: {{ $minAvailable }}
